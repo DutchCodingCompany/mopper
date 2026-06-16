@@ -60,10 +60,7 @@ class SystemDiagnostics extends StatelessWidget {
               'Build: ${data!.buildInfo}'
               ' | Device: ${data!.device}'
               ' | OS: ${data!.os}',
-              style: TextStyle(
-                fontSize: 12,
-                color: colorScheme.outlineVariant,
-              ),
+              style: TextStyle(fontSize: 12, color: colorScheme.outlineVariant),
             ),
         ],
       ),

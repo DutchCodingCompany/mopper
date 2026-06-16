@@ -1,3 +1,4 @@
+import 'package:dcc_toolkit/dcc_toolkit.dart';
 import 'package:flutter/material.dart';
 
 /// The mopper design system theme, derived from the "QA Feedback Hub" Stitch
@@ -161,7 +162,7 @@ class MopperTheme {
       style: FilledButton.styleFrom(
         backgroundColor: _primaryContainer,
         foregroundColor: _onPrimaryContainer,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: const RoundedRectangleBorder(borderRadius: Radiuses.circular8),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -174,7 +175,7 @@ class MopperTheme {
       style: OutlinedButton.styleFrom(
         foregroundColor: _onSurfaceVariant,
         side: const BorderSide(color: _outlineVariant),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: const RoundedRectangleBorder(borderRadius: Radiuses.circular8),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -198,22 +199,22 @@ class MopperTheme {
       side: BorderSide(color: _outlineVariant),
       shape: StadiumBorder(),
     ),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: _surfaceContainerLowest,
-      hintStyle: const TextStyle(color: _outline),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      hintStyle: TextStyle(color: _outline),
+      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFC6C6C6)),
+        borderRadius: Radiuses.circular8,
+        borderSide: BorderSide(color: Color(0xFFC6C6C6)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Color(0xFFC6C6C6)),
+        borderRadius: Radiuses.circular8,
+        borderSide: BorderSide(color: Color(0xFFC6C6C6)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryContainer, width: 2),
+        borderRadius: Radiuses.circular8,
+        borderSide: BorderSide(color: _primaryContainer, width: 2),
       ),
     ),
   );

@@ -117,7 +117,7 @@ class _FormBuilderScreenshotFieldState
                       widget.onAnnotated?.call(bytes);
                     },
                   ),
-                  const SizedBox(height: 8),
+                  Margins.vertical8,
                   Align(
                     alignment: Alignment.centerRight,
                     child: FilledButton.icon(
@@ -125,10 +125,7 @@ class _FormBuilderScreenshotFieldState
                       icon: const Icon(Icons.check, size: 18),
                       label: Text(context.mopperL10n.doneButton),
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
+                        padding: Paddings.horizontal16 + Paddings.vertical8,
                       ),
                     ),
                   ),
@@ -148,7 +145,7 @@ class _FormBuilderScreenshotFieldState
                         ),
                         borderRadius: Radiuses.circular12,
                       ),
-                      padding: const EdgeInsets.all(8),
+                      padding: Paddings.all8,
                       child: Image.memory(
                         screenshot,
                         fit: BoxFit.contain,
@@ -168,10 +165,7 @@ class _FormBuilderScreenshotFieldState
                         backgroundColor: colorScheme.surface,
                         foregroundColor: colorScheme.onSurface,
                         elevation: 2,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+                        padding: Paddings.horizontal16 + Paddings.vertical8,
                         textStyle: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

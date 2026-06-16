@@ -32,7 +32,11 @@ class _Stroke {
 /// annotated screenshot as a PNG byte array.
 class AnnotationOverlay extends StatefulWidget {
   /// Creates an [AnnotationOverlay] for the given [screenshot].
-  const AnnotationOverlay({required this.screenshot, required this.onAnnotated, super.key});
+  const AnnotationOverlay({
+    required this.screenshot,
+    required this.onAnnotated,
+    super.key,
+  });
 
   /// The original screenshot to annotate.
   final Uint8List screenshot;
@@ -75,7 +79,11 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
 
   void _onPanStart(DragStartDetails details) {
     setState(() {
-      _currentStroke = _Stroke(points: [details.localPosition], color: _activeColor, tool: _activeTool);
+      _currentStroke = _Stroke(
+        points: [details.localPosition],
+        color: _activeColor,
+        tool: _activeTool,
+      );
     });
   }
 
@@ -128,10 +136,17 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
                     behavior: HitTestBehavior.opaque,
                     child: Stack(
                       children: [
-                        Image.memory(widget.screenshot, fit: BoxFit.contain, width: constraints.maxWidth),
+                        Image.memory(
+                          widget.screenshot,
+                          fit: BoxFit.contain,
+                          width: constraints.maxWidth,
+                        ),
                         Positioned.fill(
                           child: CustomPaint(
-                            painter: _AnnotationPainter(strokes: _strokes, currentStroke: _currentStroke),
+                            painter: _AnnotationPainter(
+                              strokes: _strokes,
+                              currentStroke: _currentStroke,
+                            ),
                           ),
                         ),
                       ],
@@ -148,8 +163,10 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
           padding: Paddings.all8,
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+            borderRadius: Radiuses.circular8,
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
           ),
           child: Row(
             children: [
@@ -157,16 +174,22 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
               _ToolButton(
                 icon: Icons.edit,
                 isActive: _activeTool == AnnotationTool.draw,
-                onPressed: () => setState(() => _activeTool = AnnotationTool.draw),
+                onPressed: () =>
+                    setState(() => _activeTool = AnnotationTool.draw),
               ),
-              const SizedBox(width: 4),
+              Margins.horizontal4,
               _ToolButton(
                 icon: Icons.trending_flat,
                 isActive: _activeTool == AnnotationTool.arrow,
-                onPressed: () => setState(() => _activeTool = AnnotationTool.arrow),
+                onPressed: () =>
+                    setState(() => _activeTool = AnnotationTool.arrow),
               ),
-              const SizedBox(width: 4),
-              _ToolButton(icon: Icons.undo, isActive: false, onPressed: _strokes.isNotEmpty ? _undo : null),
+              Margins.horizontal4,
+              _ToolButton(
+                icon: Icons.undo,
+                isActive: false,
+                onPressed: _strokes.isNotEmpty ? _undo : null,
+              ),
               const Spacer(),
               // Color picker dots
               for (final color in _colors) ...[
@@ -175,7 +198,7 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
                   isActive: _activeColor == color,
                   onPressed: () => setState(() => _activeColor = color),
                 ),
-                if (color != _colors.last) const SizedBox(width: 4),
+                if (color != _colors.last) Margins.horizontal4,
               ],
             ],
           ),
@@ -187,7 +210,11 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
 
 /// A small square tool button in the annotation toolbar.
 class _ToolButton extends StatelessWidget {
-  const _ToolButton({required this.icon, required this.isActive, this.onPressed});
+  const _ToolButton({
+    required this.icon,
+    required this.isActive,
+    this.onPressed,
+  });
 
   final IconData icon;
   final bool isActive;
@@ -223,7 +250,11 @@ class _ToolButton extends StatelessWidget {
 
 /// A small circular color selector dot in the annotation toolbar.
 class _ColorDot extends StatelessWidget {
-  const _ColorDot({required this.color, required this.isActive, required this.onPressed});
+  const _ColorDot({
+    required this.color,
+    required this.isActive,
+    required this.onPressed,
+  });
 
   final Color color;
   final bool isActive;
@@ -239,9 +270,16 @@ class _ColorDot extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
-          border: Border.all(color: isActive ? Colors.white : Colors.transparent, width: 2),
+          border: Border.all(
+            color: isActive ? Colors.white : Colors.transparent,
+            width: 2,
+          ),
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 2, offset: const Offset(0, 1)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
           ],
         ),
       ),
