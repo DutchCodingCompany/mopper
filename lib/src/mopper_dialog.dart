@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dcc_toolkit/dcc_toolkit.dart';
 import 'package:flutter/material.dart';
 import 'package:mopper/l10n/strings.dart';
+import 'package:mopper/src/controllers/mopper_submission_controller.dart';
 import 'package:mopper/src/integrations/mopper_integration.dart';
 import 'package:mopper/src/models/mopper_data.dart';
 import 'package:mopper/src/mopper_form.dart';
@@ -13,7 +14,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 ///
 /// Applies the [MopperTheme] to ensure consistent styling regardless of the
 /// host application's theme. Dispatches submissions to all configured
-/// [MopperIntegration]s in parallel.
+/// [MopperIntegration]s in parallel via [MopperSubmissionController].
 class MopperDialog extends StatefulWidget {
   /// Creates a [MopperDialog] with required close callback and integrations.
   const MopperDialog({
@@ -41,54 +42,58 @@ class MopperDialog extends StatefulWidget {
 }
 
 class _MopperDialogState extends State<MopperDialog> {
-  bool _isSubmitting = false;
-  Uint8List? _annotatedScreenshot;
+  late final MopperSubmissionController _controller;
 
-  Future<void> _handleSubmit(MopperData data) async {
-    if (_isSubmitting) return;
+  @override
+  void initState() {
+    super.initState();
+    _controller = MopperSubmissionController(integrations: widget.integrations);
+    _controller.addListener(_onStatusChanged);
+  }
 
-    setState(() => _isSubmitting = true);
+  @override
+  void dispose() {
+    _controller
+      ..removeListener(_onStatusChanged)
+      ..dispose();
+    super.dispose();
+  }
 
-    final submission = MopperSubmission(
-      data: data,
-      screenshot: _annotatedScreenshot ?? widget.screenshot ?? Uint8List(0),
-    );
-
-    final errors = <String>[];
-
-    // Run all integrations in parallel
-    await Future.wait(
-      widget.integrations.map((integration) async {
-        try {
-          await integration.submit(submission);
-        } on Exception catch (e) {
-          errors.add('${integration.name}: $e');
-        }
-      }),
-    );
-
+  void _onStatusChanged() {
     if (!mounted) return;
 
-    if (errors.isEmpty) {
-      widget.onClose();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.mopperL10n.feedbackSubmittedSuccess),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.mopperL10n.feedbackSubmittedError(errors.join(', ')),
+    switch (_controller.status) {
+      case SubmissionStatus.success:
+        widget.onClose();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.mopperL10n.feedbackSubmittedSuccess),
+            behavior: SnackBarBehavior.floating,
           ),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+        );
+      case SubmissionStatus.error:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.mopperL10n.feedbackSubmittedError(
+                _controller.errors.join(', '),
+              ),
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      case SubmissionStatus.idle:
+      case SubmissionStatus.submitting:
+        break;
     }
+  }
+
+  Future<void> _handleSubmit(MopperData data) async {
+    final screenshot =
+        _controller.annotatedScreenshot ?? widget.screenshot ?? Uint8List(0);
+
+    await _controller.submit(data, screenshot);
   }
 
   @override
@@ -99,35 +104,41 @@ class _MopperDialogState extends State<MopperDialog> {
         builder: (context) {
           return Material(
             color: Theme.of(context).colorScheme.surface,
-            child: Stack(
-              children: [
-                MopperForm(
-                  screenshot: widget.screenshot,
-                  onSubmit: _handleSubmit,
-                  onDiscard: widget.onClose,
-                  onAnnotated: (bytes) => _annotatedScreenshot = bytes,
-                  packageInfo: widget.packageInfo,
-                ),
-                if (_isSubmitting)
-                  ColoredBox(
-                    color: Colors.black26,
-                    child: Center(
-                      child: Card(
-                        child: Padding(
-                          padding: Paddings.all24,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const CircularProgressIndicator(),
-                              Margins.vertical16,
-                              Text(context.mopperL10n.submittingFeedback),
-                            ],
+            child: ListenableBuilder(
+              listenable: _controller,
+              builder: (context, _) {
+                return Stack(
+                  children: [
+                    MopperForm(
+                      screenshot: widget.screenshot,
+                      onSubmit: _handleSubmit,
+                      onDiscard: widget.onClose,
+                      onAnnotated: (bytes) =>
+                          _controller.annotatedScreenshot = bytes,
+                      packageInfo: widget.packageInfo,
+                    ),
+                    if (_controller.status == SubmissionStatus.submitting)
+                      ColoredBox(
+                        color: Colors.black26,
+                        child: Center(
+                          child: Card(
+                            child: Padding(
+                              padding: Paddings.all24,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CircularProgressIndicator(),
+                                  Margins.vertical16,
+                                  Text(context.mopperL10n.submittingFeedback),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-              ],
+                  ],
+                );
+              },
             ),
           );
         },

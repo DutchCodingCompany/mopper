@@ -9,9 +9,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 /// included as an attachment on the feedback event.
 class SentryFeedbackIntegration implements MopperIntegration {
   @override
-  String get name => 'Sentry';
-
-  @override
   Future<void> submit(MopperSubmission submission) async {
     final description = switch (submission.data.title) {
       null => submission.data.description,

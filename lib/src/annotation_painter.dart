@@ -5,25 +5,8 @@ import 'dart:ui' as ui;
 import 'package:dcc_toolkit/dcc_toolkit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:mopper/src/mopper_theme.dart';
-
-/// The type of annotation tool currently selected.
-enum AnnotationTool {
-  /// Freehand drawing tool.
-  draw,
-
-  /// Arrow annotation tool.
-  arrow,
-}
-
-/// A single stroke drawn by the user.
-class _Stroke {
-  _Stroke({required this.points, required this.color, required this.tool});
-
-  final List<Offset> points;
-  final Color color;
-  final AnnotationTool tool;
-}
+import 'package:mopper/src/controllers/annotation_controller.dart';
+import 'package:mopper/src/models/stroke.dart';
 
 /// A widget that overlays on the screenshot preview and allows freehand
 /// drawing, arrow annotations, undo, and color selection.
@@ -49,20 +32,22 @@ class AnnotationOverlay extends StatefulWidget {
   State<AnnotationOverlay> createState() => AnnotationOverlayState();
 }
 
-/// State for [AnnotationOverlay] that manages strokes and capture.
+/// State for [AnnotationOverlay] that manages capture via a controller.
 class AnnotationOverlayState extends State<AnnotationOverlay> {
   final GlobalKey<State<StatefulWidget>> _repaintBoundaryKey = GlobalKey();
-  final List<_Stroke> _strokes = [];
-  _Stroke? _currentStroke;
+  late final AnnotationController _controller;
 
-  AnnotationTool _activeTool = AnnotationTool.draw;
-  Color _activeColor = MopperTheme.annotationRed;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnnotationController();
+  }
 
-  static const List<ui.Color> _colors = [
-    MopperTheme.annotationRed,
-    MopperTheme.annotationYellow,
-    MopperTheme.annotationBlue,
-  ];
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   /// Captures the annotated screenshot and calls the widget's onAnnotated
   /// callback.
@@ -77,133 +62,109 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
     }
   }
 
-  void _onPanStart(DragStartDetails details) {
-    setState(() {
-      _currentStroke = _Stroke(
-        points: [details.localPosition],
-        color: _activeColor,
-        tool: _activeTool,
-      );
-    });
-  }
-
-  void _onPanUpdate(DragUpdateDetails details) {
-    if (_currentStroke == null) return;
-    setState(() {
-      _currentStroke!.points.add(details.localPosition);
-    });
-  }
-
-  void _onPanEnd(DragEndDetails details) {
-    if (_currentStroke == null) return;
-    setState(() {
-      _strokes.add(_currentStroke!);
-      _currentStroke = null;
-    });
-  }
-
-  void _undo() {
-    if (_strokes.isEmpty) return;
-    setState(_strokes.removeLast);
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Screenshot with annotation canvas — natural aspect ratio
-        ClipRRect(
-          borderRadius: Radiuses.circular12,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: colorScheme.surfaceContainerHighest),
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Screenshot with annotation canvas
+            ClipRRect(
               borderRadius: Radiuses.circular12,
-            ),
-            constraints: const BoxConstraints(maxHeight: 400),
-            padding: Paddings.all8,
-            child: RepaintBoundary(
-              key: _repaintBoundaryKey,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return GestureDetector(
-                    onPanStart: _onPanStart,
-                    onPanUpdate: _onPanUpdate,
-                    onPanEnd: _onPanEnd,
-                    behavior: HitTestBehavior.opaque,
-                    child: Stack(
-                      children: [
-                        Image.memory(
-                          widget.screenshot,
-                          fit: BoxFit.contain,
-                          width: constraints.maxWidth,
-                        ),
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: _AnnotationPainter(
-                              strokes: _strokes,
-                              currentStroke: _currentStroke,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-        Margins.vertical8,
-        // Toolbar
-        Container(
-          padding: Paddings.all8,
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
-            borderRadius: Radiuses.circular8,
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Row(
-            children: [
-              // Tool buttons
-              _ToolButton(
-                icon: Icons.edit,
-                isActive: _activeTool == AnnotationTool.draw,
-                onPressed: () =>
-                    setState(() => _activeTool = AnnotationTool.draw),
-              ),
-              Margins.horizontal4,
-              _ToolButton(
-                icon: Icons.trending_flat,
-                isActive: _activeTool == AnnotationTool.arrow,
-                onPressed: () =>
-                    setState(() => _activeTool = AnnotationTool.arrow),
-              ),
-              Margins.horizontal4,
-              _ToolButton(
-                icon: Icons.undo,
-                isActive: false,
-                onPressed: _strokes.isNotEmpty ? _undo : null,
-              ),
-              const Spacer(),
-              // Color picker dots
-              for (final color in _colors) ...[
-                _ColorDot(
-                  color: color,
-                  isActive: _activeColor == color,
-                  onPressed: () => setState(() => _activeColor = color),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: colorScheme.surfaceContainerHighest,
+                  ),
+                  borderRadius: Radiuses.circular12,
                 ),
-                if (color != _colors.last) Margins.horizontal4,
-              ],
-            ],
-          ),
-        ),
-      ],
+                constraints: const BoxConstraints(maxHeight: 400),
+                padding: Paddings.all8,
+                child: RepaintBoundary(
+                  key: _repaintBoundaryKey,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GestureDetector(
+                        onPanStart: (details) =>
+                            _controller.onPanStart(details.localPosition),
+                        onPanUpdate: (details) =>
+                            _controller.onPanUpdate(details.localPosition),
+                        onPanEnd: (_) => _controller.onPanEnd(),
+                        behavior: HitTestBehavior.opaque,
+                        child: Stack(
+                          children: [
+                            Image.memory(
+                              widget.screenshot,
+                              fit: BoxFit.contain,
+                              width: constraints.maxWidth,
+                            ),
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: _AnnotationPainter(
+                                  strokes: _controller.strokes,
+                                  currentStroke: _controller.currentStroke,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Margins.vertical8,
+            // Toolbar
+            Container(
+              padding: Paddings.all8,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerLow,
+                borderRadius: Radiuses.circular8,
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  _ToolButton(
+                    icon: Icons.edit,
+                    isActive: _controller.activeTool == AnnotationTool.draw,
+                    onPressed: () => _controller.setTool(AnnotationTool.draw),
+                  ),
+                  Margins.horizontal4,
+                  _ToolButton(
+                    icon: Icons.trending_flat,
+                    isActive: _controller.activeTool == AnnotationTool.arrow,
+                    onPressed: () => _controller.setTool(AnnotationTool.arrow),
+                  ),
+                  Margins.horizontal4,
+                  _ToolButton(
+                    icon: Icons.undo,
+                    isActive: false,
+                    onPressed: _controller.canUndo ? _controller.undo : null,
+                  ),
+                  const Spacer(),
+                  for (final color in AnnotationController.colors) ...[
+                    _ColorDot(
+                      color: color,
+                      isActive: _controller.activeColor == color,
+                      onPressed: () => _controller.setColor(color),
+                    ),
+                    if (color != AnnotationController.colors.last)
+                      Margins.horizontal4,
+                  ],
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -291,8 +252,8 @@ class _ColorDot extends StatelessWidget {
 class _AnnotationPainter extends CustomPainter {
   _AnnotationPainter({required this.strokes, this.currentStroke});
 
-  final List<_Stroke> strokes;
-  final _Stroke? currentStroke;
+  final List<Stroke> strokes;
+  final Stroke? currentStroke;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -304,7 +265,7 @@ class _AnnotationPainter extends CustomPainter {
     }
   }
 
-  void _paintStroke(Canvas canvas, _Stroke stroke) {
+  void _paintStroke(Canvas canvas, Stroke stroke) {
     if (stroke.points.isEmpty) return;
 
     final paint = Paint()

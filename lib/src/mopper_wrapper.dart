@@ -5,7 +5,9 @@ import 'dart:ui' as ui;
 import 'package:dcc_toolkit/common/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mopper/l10n/mopper_localizations.dart';
 import 'package:mopper/l10n/strings.dart';
+import 'package:mopper/src/controllers/mopper_wrapper_controller.dart';
 import 'package:mopper/src/integrations/mopper_integration.dart';
 import 'package:mopper/src/mopper_dialog.dart';
 import 'package:mopper/src/mopper_theme.dart';
@@ -41,23 +43,19 @@ class MopperWrapper extends StatefulWidget {
 
 class _MopperWrapperState extends State<MopperWrapper> {
   final GlobalKey<State<StatefulWidget>> _boundaryKey = GlobalKey();
-  Uint8List? _screenshot;
-  bool _showDialog = false;
-  PackageInfo? _packageInfo;
+  late final MopperWrapperController _controller;
 
   @override
   void initState() {
     super.initState();
-    if (widget.packageInfo != null) {
-      _packageInfo = widget.packageInfo;
-    } else {
-      unawaited(_loadPackageInfo());
-    }
+    _controller = MopperWrapperController(packageInfo: widget.packageInfo);
+    unawaited(_controller.loadPackageInfo());
   }
 
-  Future<void> _loadPackageInfo() async {
-    final info = await PackageInfo.fromPlatform();
-    if (mounted) setState(() => _packageInfo = info);
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   Future<Uint8List?> _captureScreenshot() async {
@@ -76,52 +74,51 @@ class _MopperWrapperState extends State<MopperWrapper> {
   }
 
   void _openMopperDialog() {
-    setState(() {
-      _showDialog = true;
-      _screenshot = null;
-    });
+    _controller.openDialog();
     unawaited(_captureScreenshotAsync());
   }
 
   Future<void> _captureScreenshotAsync() async {
     final screenshot = await _captureScreenshot();
-    if (!mounted || !_showDialog) return;
-    setState(() => _screenshot = screenshot);
-  }
-
-  void _closeMopperDialog() {
-    setState(() {
-      _showDialog = false;
-      _screenshot = null;
-    });
+    if (!mounted || !_controller.showDialog) return;
+    _controller.setScreenshot(screenshot);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        RepaintBoundary(key: _boundaryKey, child: widget.child),
-        if (!_showDialog)
-          Positioned(
-            right: Sizes.px16,
-            bottom: 100,
-            child: ElevatedButton.icon(
-              style: MopperTheme.light.elevatedButtonTheme.style,
-              onPressed: _openMopperDialog,
-              label: Text(context.mopperL10n.feedbackButtonLabel),
-              icon: const Icon(Icons.feedback_outlined),
-            ),
-          ),
-        if (_showDialog)
-          Positioned.fill(
-            child: MopperDialog(
-              screenshot: _screenshot,
-              onClose: _closeMopperDialog,
-              integrations: widget.integrations,
-              packageInfo: _packageInfo,
-            ),
-          ),
-      ],
+    return Localizations(
+      locale: Localizations.localeOf(context),
+      delegates: MopperLocalizations.localizationsDelegates,
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          return Stack(
+            children: [
+              RepaintBoundary(key: _boundaryKey, child: widget.child),
+              if (!_controller.showDialog)
+                Positioned(
+                  right: Sizes.px16,
+                  bottom: 100,
+                  child: ElevatedButton.icon(
+                    style: MopperTheme.light.elevatedButtonTheme.style,
+                    onPressed: _openMopperDialog,
+                    label: Text(context.mopperL10n.feedbackButtonLabel),
+                    icon: const Icon(Icons.feedback_outlined),
+                  ),
+                ),
+              if (_controller.showDialog)
+                Positioned.fill(
+                  child: MopperDialog(
+                    screenshot: _controller.screenshot,
+                    onClose: _controller.closeDialog,
+                    integrations: widget.integrations,
+                    packageInfo: _controller.packageInfo,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

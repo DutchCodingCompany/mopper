@@ -49,10 +49,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Add MopperLocalizations.delegate alongside your other delegates
-      localizationsDelegates: const [
-        MopperLocalizations.delegate,
-      ],
       builder: (context, child) {
         return MopperWrapper(
           integrations: [
@@ -106,27 +102,12 @@ Implement the `MopperIntegration` interface to add your own backend:
 
 ```dart
 class SlackIntegration implements MopperIntegration {
-  @override
-  String get name => 'Slack';
 
   @override
   Future<void> submit(MopperSubmission submission) async {
     // Upload screenshot and post message to Slack...
   }
 }
-```
-
-## Localization
-
-Mopper ships with English and Dutch translations. Add `MopperLocalizations.delegate` to your `localizationsDelegates`:
-
-```dart
-MaterialApp(
-  localizationsDelegates: const [
-    MopperLocalizations.delegate,
-    // ... your other delegates
-  ],
-)
 ```
 
 ## Additional information

@@ -1,4 +1,3 @@
-export 'l10n/mopper_localizations.dart';
 export 'src/exceptions/mopper_exception.dart';
 export 'src/integrations/gitlab_integration.dart';
 export 'src/integrations/mopper_integration.dart';

@@ -12,7 +12,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mopper Example',
-      localizationsDelegates: const [MopperLocalizations.delegate],
       builder: (context, child) {
         return MopperWrapper(
           integrations: [

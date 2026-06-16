@@ -10,8 +10,6 @@ import 'package:mopper/src/models/mopper_data.dart';
 /// Example:
 /// ```dart
 /// class MyIntegration implements MopperIntegration {
-///   @override
-///   String get name => 'My Service';
 ///
 ///   @override
 ///   Future<void> submit(MopperSubmission submission) async {
@@ -19,10 +17,8 @@ import 'package:mopper/src/models/mopper_data.dart';
 ///   }
 /// }
 /// ```
+// ignore: one_member_abstracts
 abstract class MopperIntegration {
-  /// Human-readable name for error reporting (e.g. "GitLab", "Sentry").
-  String get name;
-
   /// Submit mopper to this integration.
   ///
   /// Throws on failure — the caller will catch and report which

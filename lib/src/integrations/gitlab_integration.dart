@@ -28,9 +28,6 @@ class GitLabIntegration implements MopperIntegration {
   final String gitlabUrl;
 
   @override
-  String get name => 'GitLab';
-
-  @override
   Future<void> submit(MopperSubmission submission) async {
     final baseUrl = 'https://$gitlabUrl/api/v4/projects/$projectId';
     final screenshot = submission.screenshot.isEmpty
