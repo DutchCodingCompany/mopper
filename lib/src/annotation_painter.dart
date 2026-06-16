@@ -1,0 +1,334 @@
+import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:dcc_toolkit/dcc_toolkit.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:mopper/src/mopper_theme.dart';
+
+/// The type of annotation tool currently selected.
+enum AnnotationTool {
+  /// Freehand drawing tool.
+  draw,
+
+  /// Arrow annotation tool.
+  arrow,
+}
+
+/// A single stroke drawn by the user.
+class _Stroke {
+  _Stroke({required this.points, required this.color, required this.tool});
+
+  final List<Offset> points;
+  final Color color;
+  final AnnotationTool tool;
+}
+
+/// A widget that overlays on the screenshot preview and allows freehand
+/// drawing, arrow annotations, undo, and color selection.
+///
+/// Call [AnnotationOverlayState.captureAnnotatedImage] to get the final
+/// annotated screenshot as a PNG byte array.
+class AnnotationOverlay extends StatefulWidget {
+  /// Creates an [AnnotationOverlay] for the given [screenshot].
+  const AnnotationOverlay({required this.screenshot, required this.onAnnotated, super.key});
+
+  /// The original screenshot to annotate.
+  final Uint8List screenshot;
+
+  /// Called when the user finishes annotating, with the final image bytes.
+  /// This is triggered when the parent requests it via the GlobalKey.
+  final ValueChanged<Uint8List> onAnnotated;
+
+  @override
+  State<AnnotationOverlay> createState() => AnnotationOverlayState();
+}
+
+/// State for [AnnotationOverlay] that manages strokes and capture.
+class AnnotationOverlayState extends State<AnnotationOverlay> {
+  final GlobalKey<State<StatefulWidget>> _repaintBoundaryKey = GlobalKey();
+  final List<_Stroke> _strokes = [];
+  _Stroke? _currentStroke;
+
+  AnnotationTool _activeTool = AnnotationTool.draw;
+  Color _activeColor = MopperTheme.annotationRed;
+
+  static const List<ui.Color> _colors = [
+    MopperTheme.annotationRed,
+    MopperTheme.annotationYellow,
+    MopperTheme.annotationBlue,
+  ];
+
+  /// Captures the annotated screenshot and calls the widget's onAnnotated
+  /// callback.
+  Future<void> captureAnnotatedImage() async {
+    final boundary = _repaintBoundaryKey.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary) return;
+
+    final image = await boundary.toImage(pixelRatio: 2);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData != null) {
+      widget.onAnnotated(byteData.buffer.asUint8List());
+    }
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    setState(() {
+      _currentStroke = _Stroke(points: [details.localPosition], color: _activeColor, tool: _activeTool);
+    });
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_currentStroke == null) return;
+    setState(() {
+      _currentStroke!.points.add(details.localPosition);
+    });
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (_currentStroke == null) return;
+    setState(() {
+      _strokes.add(_currentStroke!);
+      _currentStroke = null;
+    });
+  }
+
+  void _undo() {
+    if (_strokes.isEmpty) return;
+    setState(_strokes.removeLast);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Screenshot with annotation canvas — natural aspect ratio
+        ClipRRect(
+          borderRadius: Radiuses.circular12,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.surfaceContainerHighest),
+              borderRadius: Radiuses.circular12,
+            ),
+            constraints: const BoxConstraints(maxHeight: 400),
+            padding: Paddings.all8,
+            child: RepaintBoundary(
+              key: _repaintBoundaryKey,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector(
+                    onPanStart: _onPanStart,
+                    onPanUpdate: _onPanUpdate,
+                    onPanEnd: _onPanEnd,
+                    behavior: HitTestBehavior.opaque,
+                    child: Stack(
+                      children: [
+                        Image.memory(widget.screenshot, fit: BoxFit.contain, width: constraints.maxWidth),
+                        Positioned.fill(
+                          child: CustomPaint(
+                            painter: _AnnotationPainter(strokes: _strokes, currentStroke: _currentStroke),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        Margins.vertical8,
+        // Toolbar
+        Container(
+          padding: Paddings.all8,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              // Tool buttons
+              _ToolButton(
+                icon: Icons.edit,
+                isActive: _activeTool == AnnotationTool.draw,
+                onPressed: () => setState(() => _activeTool = AnnotationTool.draw),
+              ),
+              const SizedBox(width: 4),
+              _ToolButton(
+                icon: Icons.trending_flat,
+                isActive: _activeTool == AnnotationTool.arrow,
+                onPressed: () => setState(() => _activeTool = AnnotationTool.arrow),
+              ),
+              const SizedBox(width: 4),
+              _ToolButton(icon: Icons.undo, isActive: false, onPressed: _strokes.isNotEmpty ? _undo : null),
+              const Spacer(),
+              // Color picker dots
+              for (final color in _colors) ...[
+                _ColorDot(
+                  color: color,
+                  isActive: _activeColor == color,
+                  onPressed: () => setState(() => _activeColor = color),
+                ),
+                if (color != _colors.last) const SizedBox(width: 4),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A small square tool button in the annotation toolbar.
+class _ToolButton extends StatelessWidget {
+  const _ToolButton({required this.icon, required this.isActive, this.onPressed});
+
+  final IconData icon;
+  final bool isActive;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Material(
+        color: isActive ? colorScheme.primary : Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(4),
+          child: Icon(
+            icon,
+            size: 20,
+            color: isActive
+                ? colorScheme.onPrimary
+                : onPressed != null
+                ? colorScheme.onSurface
+                : colorScheme.outline,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A small circular color selector dot in the annotation toolbar.
+class _ColorDot extends StatelessWidget {
+  const _ColorDot({required this.color, required this.isActive, required this.onPressed});
+
+  final Color color;
+  final bool isActive;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: isActive ? Colors.white : Colors.transparent, width: 2),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 2, offset: const Offset(0, 1)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// CustomPainter that renders all strokes and the current in-progress stroke.
+class _AnnotationPainter extends CustomPainter {
+  _AnnotationPainter({required this.strokes, this.currentStroke});
+
+  final List<_Stroke> strokes;
+  final _Stroke? currentStroke;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final stroke in strokes) {
+      _paintStroke(canvas, stroke);
+    }
+    if (currentStroke != null) {
+      _paintStroke(canvas, currentStroke!);
+    }
+  }
+
+  void _paintStroke(Canvas canvas, _Stroke stroke) {
+    if (stroke.points.isEmpty) return;
+
+    final paint = Paint()
+      ..color = stroke.color
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..style = PaintingStyle.stroke;
+
+    switch (stroke.tool) {
+      case AnnotationTool.draw:
+        _paintFreehand(canvas, stroke.points, paint);
+      case AnnotationTool.arrow:
+        _paintArrow(canvas, stroke.points, paint);
+    }
+  }
+
+  void _paintFreehand(Canvas canvas, List<Offset> points, Paint paint) {
+    if (points.length < 2) {
+      canvas.drawCircle(points.first, paint.strokeWidth / 2, paint);
+      return;
+    }
+
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (var i = 1; i < points.length; i++) {
+      path.lineTo(points[i].dx, points[i].dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  void _paintArrow(Canvas canvas, List<Offset> points, Paint paint) {
+    if (points.length < 2) return;
+
+    final start = points.first;
+    final end = points.last;
+
+    // Draw the line
+    canvas.drawLine(start, end, paint);
+
+    // Draw arrowhead
+    final angle = (end - start).direction;
+    const arrowLength = 12.0;
+    const arrowAngle = 0.5; // radians (~30 degrees)
+
+    final p1 = Offset(
+      end.dx - arrowLength * math.cos(angle - arrowAngle),
+      end.dy - arrowLength * math.sin(angle - arrowAngle),
+    );
+    final p2 = Offset(
+      end.dx - arrowLength * math.cos(angle + arrowAngle),
+      end.dy - arrowLength * math.sin(angle + arrowAngle),
+    );
+
+    final arrowPath = Path()
+      ..moveTo(end.dx, end.dy)
+      ..lineTo(p1.dx, p1.dy)
+      ..moveTo(end.dx, end.dy)
+      ..lineTo(p2.dx, p2.dy);
+
+    canvas.drawPath(arrowPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AnnotationPainter oldDelegate) => true;
+}

@@ -1,0 +1,17 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+formatter:
+  trailing_commas: automate
+
+analyzer:
+  errors:
+    unawaited_futures: warning
+    avoid_void_async: warning
+    missing_return: error
+    missing_required_param: error
+    invalid_annotation_target: info
+
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true

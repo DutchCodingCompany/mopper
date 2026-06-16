@@ -1,0 +1,105 @@
+{
+  "@@locale": "en",
+  "feedbackButtonLabel": "Feedback",
+  "@feedbackButtonLabel": {
+    "description": "Label for the floating action button that opens the feedback form"
+  },
+  "submitFeedbackTitle": "Submit Feedback",
+  "@submitFeedbackTitle": {
+    "description": "Title shown in the app bar of the feedback form"
+  },
+  "descriptionLabel": "Description",
+  "@descriptionLabel": {
+    "description": "Label for the description text field"
+  },
+  "descriptionHint": "Please describe the steps to reproduce or your specific suggestion...",
+  "@descriptionHint": {
+    "description": "Hint text for the description text field"
+  },
+  "descriptionRequired": "Description is required",
+  "@descriptionRequired": {
+    "description": "Validation error when description field is empty"
+  },
+  "categoryLabel": "Category",
+  "@categoryLabel": {
+    "description": "Label for the category choice chips"
+  },
+  "categoryUiUx": "UI/UX",
+  "@categoryUiUx": {
+    "description": "Category chip label for UI/UX issues"
+  },
+  "categoryBug": "Bug",
+  "@categoryBug": {
+    "description": "Category chip label for bugs"
+  },
+  "categoryPerformance": "Performance",
+  "@categoryPerformance": {
+    "description": "Category chip label for performance issues"
+  },
+  "categoryFeature": "Feature",
+  "@categoryFeature": {
+    "description": "Category chip label for feature requests"
+  },
+  "yourNameLabel": "Your Name (Optional)",
+  "@yourNameLabel": {
+    "description": "Label for the optional name text field"
+  },
+  "yourNameHint": "e.g. Alex Chen",
+  "@yourNameHint": {
+    "description": "Hint text for the name text field"
+  },
+  "feedbackTitleLabel": "Feedback Title (Optional)",
+  "@feedbackTitleLabel": {
+    "description": "Label for the optional feedback title text field"
+  },
+  "feedbackTitleHint": "Brief summary of the issue",
+  "@feedbackTitleHint": {
+    "description": "Hint text for the feedback title text field"
+  },
+  "discardButton": "Discard",
+  "@discardButton": {
+    "description": "Label for the discard button"
+  },
+  "submitButton": "Submit Feedback",
+  "@submitButton": {
+    "description": "Label for the submit feedback button"
+  },
+  "screenshotAttached": "Screenshot attached",
+  "@screenshotAttached": {
+    "description": "Label shown when a screenshot is attached"
+  },
+  "annotateButton": "Annotate",
+  "@annotateButton": {
+    "description": "Label for the button to start annotating a screenshot"
+  },
+  "doneButton": "Done",
+  "@doneButton": {
+    "description": "Label for the button to finish annotating"
+  },
+  "requiredBadge": "REQUIRED",
+  "@requiredBadge": {
+    "description": "Badge text shown next to required fields"
+  },
+  "systemDiagnosticsTitle": "System Diagnostics",
+  "@systemDiagnosticsTitle": {
+    "description": "Title for the system diagnostics section"
+  },
+  "feedbackSubmittedSuccess": "Feedback submitted successfully.",
+  "@feedbackSubmittedSuccess": {
+    "description": "Snackbar message shown when feedback is submitted successfully"
+  },
+  "feedbackSubmittedError": "Failed: {errors}",
+  "@feedbackSubmittedError": {
+    "description": "Snackbar message shown when feedback submission fails",
+    "placeholders": {
+      "errors": {
+        "type": "String",
+        "description": "Comma-separated list of error messages"
+      }
+    }
+  },
+  "submittingFeedback": "Submitting feedback...",
+  "@submittingFeedback": {
+    "description": "Loading overlay text shown while feedback is being submitted"
+  }
+}
