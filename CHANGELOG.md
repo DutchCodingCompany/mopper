@@ -1,3 +1,6 @@
+# 0.1.1
+- Updated dcc_toolkit to 0.1.1
+
 # 0.1.0
 
 - Initial release.
