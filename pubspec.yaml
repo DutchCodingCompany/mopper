@@ -11,7 +11,7 @@ environment:
   flutter: ">=3.38.4"
 
 dependencies:
-  dcc_toolkit: ^0.1.1
+  dcc_toolkit: ">=0.1.1 <0.3.0"
   device_info_plus: ^13.1.0
   flutter:
     sdk: flutter
