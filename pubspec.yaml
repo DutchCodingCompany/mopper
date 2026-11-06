@@ -2,7 +2,7 @@ name: mopper
 description: >-
   In-app feedback capture widget with screenshot annotation, automatic
   diagnostics collection, and pluggable integrations for GitLab and Sentry.
-version: 0.1.1
+version: 0.2.0
 repository: https://github.com/DutchCodingCompany/mopper
 topics: [feedback, flutter, screenshot, qa]
 

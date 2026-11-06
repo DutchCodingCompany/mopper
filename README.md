@@ -28,8 +28,10 @@ In Dutch, *mopperen* means **to grumble** or **to complain**. This package turns
 
 ```yaml
 dependencies:
-  mopper: ^0.1.0
+  mopper: ^0.2.0
 ```
+
+Requires Flutter 3.47 or newer. Through `sentry_flutter` 10, your app also needs Android `minSdk` 26 or higher and Swift Package Manager on iOS and macOS. Mopper works in apps built with `package:flutter/material` as well as `package:material_ui`.
 
 ## Usage
 
