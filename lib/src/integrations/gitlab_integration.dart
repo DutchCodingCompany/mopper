@@ -12,7 +12,7 @@ import 'package:mopper/src/models/mopper_data.dart';
 /// with the mopper description and the embedded image.
 class GitLabIntegration implements MopperIntegration {
   /// Creates a [GitLabIntegration] for the given GitLab project.
-  const GitLabIntegration({
+  const new({
     required this.projectId,
     required this.apiToken,
     required this.gitlabUrl,

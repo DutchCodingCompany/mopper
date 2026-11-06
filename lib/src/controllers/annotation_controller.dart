@@ -12,7 +12,7 @@ import 'package:mopper/src/mopper_theme.dart';
 /// strokes and capturing the final annotated image.
 class AnnotationController extends ChangeNotifier {
   /// Creates an [AnnotationController] with default tool and color.
-  AnnotationController();
+  new();
 
   final List<Stroke> _strokes = [];
   Stroke? _currentStroke;

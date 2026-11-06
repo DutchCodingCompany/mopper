@@ -17,7 +17,6 @@ import 'package:mopper/src/models/mopper_data.dart';
 ///   }
 /// }
 /// ```
-// ignore: one_member_abstracts
 abstract class MopperIntegration {
   /// Submit mopper to this integration.
   ///
@@ -29,7 +28,7 @@ abstract class MopperIntegration {
 /// Complete mopper payload passed to each [MopperIntegration].
 class MopperSubmission {
   /// Creates a [MopperSubmission] with the given [data] and [screenshot].
-  const MopperSubmission({required this.data, required this.screenshot});
+  const new({required this.data, required this.screenshot});
 
   /// The form data (title, description, category, userName).
   final MopperData data;

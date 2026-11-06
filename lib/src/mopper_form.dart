@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dcc_toolkit/dcc_toolkit.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mopper/l10n/strings.dart';
 import 'package:mopper/src/controllers/mopper_form_controller.dart';
 import 'package:mopper/src/form_builder_screenshot_field.dart';
@@ -15,7 +15,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// The feedback form containing all input fields and submit actions.
 class MopperForm extends StatefulWidget {
   /// Creates a [MopperForm] with submit and discard callbacks.
-  const MopperForm({
+  const new({
     required this.onSubmit,
     required this.onDiscard,
     this.screenshot,

@@ -1,7 +1,7 @@
 /// Data collected from the mopper form.
 class MopperData {
   /// Creates a [MopperData] instance with the given form values.
-  const MopperData({
+  const new({
     required this.description,
     this.title,
     this.userName,

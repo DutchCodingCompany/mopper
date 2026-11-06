@@ -1,5 +1,5 @@
 import 'package:dcc_toolkit/dcc_toolkit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mopper/l10n/strings.dart';
 
 /// A field label widget with optional REQUIRED indicator.
@@ -7,7 +7,7 @@ import 'package:mopper/l10n/strings.dart';
 /// Used to label form fields throughout the mopper package.
 class FieldLabel extends StatelessWidget {
   /// Creates a [FieldLabel] with the given [label] text.
-  const FieldLabel({required this.label, this.required = false, super.key});
+  const new({required this.label, this.required = false, super.key});
 
   /// The label text to display.
   final String label;
