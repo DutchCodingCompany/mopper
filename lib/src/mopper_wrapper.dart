@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:dcc_toolkit/common/dimensions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mopper/l10n/mopper_localizations.dart';
 import 'package:mopper/l10n/strings.dart';
 import 'package:mopper/src/controllers/mopper_wrapper_controller.dart';
@@ -86,39 +86,64 @@ class _MopperWrapperState extends State<MopperWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return Localizations(
-      locale: Localizations.localeOf(context),
-      delegates: MopperLocalizations.localizationsDelegates,
-      child: ListenableBuilder(
-        listenable: _controller,
-        builder: (context, _) {
-          return Stack(
-            children: [
-              RepaintBoundary(key: _boundaryKey, child: widget.child),
-              if (!_controller.showDialog)
-                Positioned(
-                  right: Sizes.px16,
-                  bottom: 100,
-                  child: ElevatedButton.icon(
-                    style: MopperTheme.light.elevatedButtonTheme.style,
-                    onPressed: _openMopperDialog,
-                    label: Text(context.mopperL10n.feedbackButtonLabel),
-                    icon: const Icon(Icons.feedback_outlined),
-                  ),
-                ),
-              if (_controller.showDialog)
-                Positioned.fill(
-                  child: MopperDialog(
-                    screenshot: _controller.screenshot,
-                    onClose: _controller.closeDialog,
-                    integrations: widget.integrations,
-                    packageInfo: _controller.packageInfo,
-                  ),
-                ),
+    return Stack(
+      children: [
+        RepaintBoundary(key: _boundaryKey, child: widget.child),
+        // Everything mopper needs is provided here rather than taken from the
+        // host app, which may use package:flutter/material instead of
+        // package:material_ui and has no Overlay above MaterialApp.builder.
+        // It wraps only this layer, so the host app keeps its own
+        // localizations and ScaffoldMessenger.
+        Positioned.fill(
+          child: Localizations(
+            locale: Localizations.localeOf(context),
+            // Not MopperLocalizations.localizationsDelegates: gen-l10n adds
+            // the MaterialLocalizations of package:flutter/material there.
+            delegates: const [
+              MopperLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
             ],
-          );
-        },
-      ),
+            child: Theme(
+              data: MopperTheme.light,
+              child: ScaffoldMessenger(
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (context, _) {
+                    if (_controller.showDialog) {
+                      return Overlay.wrap(
+                        child: MopperDialog(
+                          screenshot: _controller.screenshot,
+                          onClose: _controller.closeDialog,
+                          integrations: widget.integrations,
+                          packageInfo: _controller.packageInfo,
+                        ),
+                      );
+                    }
+                    return Stack(
+                      children: [
+                        // Shows the snackbar that is still visible after the
+                        // dialog closes.
+                        const IgnorePointer(
+                          child: Scaffold(backgroundColor: Colors.transparent),
+                        ),
+                        Positioned(
+                          right: Sizes.px16,
+                          bottom: 100,
+                          child: ElevatedButton.icon(
+                            onPressed: _openMopperDialog,
+                            label: Text(context.mopperL10n.feedbackButtonLabel),
+                            icon: const Icon(Icons.feedback_outlined),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

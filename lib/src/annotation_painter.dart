@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:dcc_toolkit/dcc_toolkit.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mopper/src/controllers/annotation_controller.dart';
 import 'package:mopper/src/models/stroke.dart';
 

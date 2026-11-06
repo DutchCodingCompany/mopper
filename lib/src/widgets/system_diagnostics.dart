@@ -1,5 +1,5 @@
 import 'package:dcc_toolkit/dcc_toolkit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mopper/l10n/strings.dart';
 
 import 'package:mopper/src/models/diagnostic_data.dart';
