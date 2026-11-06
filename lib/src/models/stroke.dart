@@ -12,7 +12,7 @@ enum AnnotationTool {
 /// A single annotation stroke drawn by the user.
 class Stroke {
   /// Creates a [Stroke] with the given [points], [color], and [tool].
-  Stroke({required this.points, required this.color, required this.tool});
+  new({required this.points, required this.color, required this.tool});
 
   /// The list of points that make up this stroke.
   final List<Offset> points;

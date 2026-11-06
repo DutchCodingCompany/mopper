@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// This theme is applied as a scoped override inside the feedback overlay,
 /// ensuring visual consistency regardless of the host app's theme.
 class MopperTheme {
-  MopperTheme._();
+  new _();
 
   // ─── Color Tokens ─────────────────────────────────────────────────────
 

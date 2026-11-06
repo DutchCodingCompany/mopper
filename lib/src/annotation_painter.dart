@@ -15,11 +15,7 @@ import 'package:mopper/src/models/stroke.dart';
 /// annotated screenshot as a PNG byte array.
 class AnnotationOverlay extends StatefulWidget {
   /// Creates an [AnnotationOverlay] for the given [screenshot].
-  const AnnotationOverlay({
-    required this.screenshot,
-    required this.onAnnotated,
-    super.key,
-  });
+  const new({required this.screenshot, required this.onAnnotated, super.key});
 
   /// The original screenshot to annotate.
   final Uint8List screenshot;
@@ -171,11 +167,7 @@ class AnnotationOverlayState extends State<AnnotationOverlay> {
 
 /// A small square tool button in the annotation toolbar.
 class _ToolButton extends StatelessWidget {
-  const _ToolButton({
-    required this.icon,
-    required this.isActive,
-    this.onPressed,
-  });
+  const new({required this.icon, required this.isActive, this.onPressed});
 
   final IconData icon;
   final bool isActive;
@@ -211,7 +203,7 @@ class _ToolButton extends StatelessWidget {
 
 /// A small circular color selector dot in the annotation toolbar.
 class _ColorDot extends StatelessWidget {
-  const _ColorDot({
+  const new({
     required this.color,
     required this.isActive,
     required this.onPressed,
@@ -250,7 +242,7 @@ class _ColorDot extends StatelessWidget {
 
 /// CustomPainter that renders all strokes and the current in-progress stroke.
 class _AnnotationPainter extends CustomPainter {
-  _AnnotationPainter({required this.strokes, this.currentStroke});
+  new({required this.strokes, this.currentStroke});
 
   final List<Stroke> strokes;
   final Stroke? currentStroke;

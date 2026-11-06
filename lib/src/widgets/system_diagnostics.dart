@@ -10,7 +10,7 @@ import 'package:mopper/src/models/diagnostic_data.dart';
 /// displayed immediately; when null a loading spinner is shown.
 class SystemDiagnostics extends StatelessWidget {
   /// Creates a [SystemDiagnostics] widget.
-  const SystemDiagnostics({super.key, this.data});
+  const new({super.key, this.data});
 
   /// The diagnostics data to display. Shows a spinner when null.
   final DiagnosticsData? data;

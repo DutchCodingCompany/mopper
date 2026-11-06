@@ -15,7 +15,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// The feedback form containing all input fields and submit actions.
 class MopperForm extends StatefulWidget {
   /// Creates a [MopperForm] with submit and discard callbacks.
-  const MopperForm({
+  const new({
     required this.onSubmit,
     required this.onDiscard,
     this.screenshot,

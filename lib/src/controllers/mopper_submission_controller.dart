@@ -25,7 +25,7 @@ enum SubmissionStatus {
 /// collects errors, and exposes status for the UI to react to.
 class MopperSubmissionController extends ChangeNotifier {
   /// Creates a [MopperSubmissionController] with the given [integrations].
-  MopperSubmissionController({required this.integrations});
+  new({required this.integrations});
 
   /// The list of integrations to submit feedback to.
   final List<MopperIntegration> integrations;

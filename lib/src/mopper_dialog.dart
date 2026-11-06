@@ -17,7 +17,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// [MopperIntegration]s in parallel via [MopperSubmissionController].
 class MopperDialog extends StatefulWidget {
   /// Creates a [MopperDialog] with required close callback and integrations.
-  const MopperDialog({
+  const new({
     required this.onClose,
     required this.integrations,
     this.screenshot,

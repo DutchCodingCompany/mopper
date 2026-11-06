@@ -5,11 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// Data class to hold diagnostics information.
 class DiagnosticsData {
   /// Creates a [DiagnosticsData] with the given values.
-  const DiagnosticsData({
-    required this.buildInfo,
-    required this.device,
-    required this.os,
-  });
+  const new({required this.buildInfo, required this.device, required this.os});
 
   /// Application build version (e.g. '1.0.0+1').
   final String buildInfo;

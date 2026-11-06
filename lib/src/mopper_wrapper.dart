@@ -21,7 +21,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// in the `MaterialApp.builder`).
 class MopperWrapper extends StatefulWidget {
   /// Creates a [MopperWrapper] with the given [integrations] and [child].
-  const MopperWrapper({
+  const new({
     required this.integrations,
     required this.child,
     this.packageInfo,

@@ -6,7 +6,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 }
 
 class ExampleHome extends StatelessWidget {
-  const ExampleHome({super.key});
+  const new({super.key});
 
   @override
   Widget build(BuildContext context) {

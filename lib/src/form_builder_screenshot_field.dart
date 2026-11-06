@@ -16,7 +16,7 @@ import 'package:mopper/src/widgets/field_label.dart';
 /// shown.
 class FormBuilderScreenshotField extends FormBuilderField<Uint8List?> {
   /// Creates a [FormBuilderScreenshotField] with the given [name].
-  const FormBuilderScreenshotField({
+  const new({
     required super.name,
     super.key,
     super.validator,

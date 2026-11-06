@@ -8,10 +8,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 class MopperWrapperController extends ChangeNotifier {
   /// Creates a [MopperWrapperController].
   ///
-  /// If [packageInfo] is provided, it will be used directly. Otherwise
+  /// If [_packageInfo] is provided, it will be used directly. Otherwise
   /// [loadPackageInfo] must be called to load it from the platform.
-  MopperWrapperController({PackageInfo? packageInfo})
-    : _packageInfo = packageInfo;
+  new({this._packageInfo});
 
   bool _showDialog = false;
   Uint8List? _screenshot;

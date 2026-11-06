@@ -9,7 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 /// [MopperData] from raw form values.
 class MopperFormController extends ChangeNotifier {
   /// Creates a [MopperFormController].
-  MopperFormController();
+  new();
 
   DiagnosticsData? _diagnostics;
   bool _diagnosticsLoading = false;
