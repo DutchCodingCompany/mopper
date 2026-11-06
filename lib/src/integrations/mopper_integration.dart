@@ -17,7 +17,6 @@ import 'package:mopper/src/models/mopper_data.dart';
 ///   }
 /// }
 /// ```
-// ignore: one_member_abstracts
 abstract class MopperIntegration {
   /// Submit mopper to this integration.
   ///
